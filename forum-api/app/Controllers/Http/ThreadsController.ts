@@ -5,7 +5,7 @@ import ThreadValidator from 'App/Validators/ThreadValidator'
 export default class ThreadsController {
   public async index({ response }: HttpContextContract) {
     try {
-      const threads = await Thread.query().preload('category').preload('user')
+      const threads = await Thread.query().preload('category').preload('user').preload('replies')
 
       return response.status(200).json({
         data: threads,
@@ -40,6 +40,7 @@ export default class ThreadsController {
         .where('id', params.id)
         .preload('category')
         .preload('user')
+        .preload('repies')
         .firstOrFail()
       return response.status(200).json({
         data: thread,
