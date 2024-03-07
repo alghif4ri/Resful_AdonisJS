@@ -40,7 +40,7 @@ export default class ThreadsController {
         .where('id', params.id)
         .preload('category')
         .preload('user')
-        .preload('repies')
+        .preload('replies')
         .firstOrFail()
       return response.status(200).json({
         data: thread,
