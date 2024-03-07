@@ -1,4 +1,5 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import UnauthorizedException from 'App/Exceptions/UnauthorizedException'
 import Thread from 'App/Models/Thread'
 import SortThreadValidator from 'App/Validators/SortThreadValidator'
 import ThreadValidator from 'App/Validators/ThreadValidator'
@@ -75,9 +76,7 @@ export default class ThreadsController {
       const thread = await Thread.findOrFail(params.id)
 
       if (user?.id !== thread.userId) {
-        return response.status(401).json({
-          message: 'Unauthorized',
-        })
+        throw new UnauthorizedException('Unauthorized', 403, 'E_UNTHORIZED')
       }
       const validateData = await request.validate(ThreadValidator)
 
@@ -91,9 +90,18 @@ export default class ThreadsController {
         data: thread,
       })
     } catch (error) {
-      return response.status(404).json({
-        message: error,
-      })
+      // return response.status(404).json({
+      //   message: error,
+      // })
+      if (error.name === 'UnauthorizedException') {
+        return response.status(error.status).json({
+          message: error.message,
+        })
+      } else {
+        return response.status(404).json({
+          message: 'Thread Not Found!',
+        })
+      }
     }
   }
 
@@ -102,10 +110,13 @@ export default class ThreadsController {
       const user = await auth.user
       const thread = await Thread.findOrFail(params.id)
 
+      // if (user?.id !== thread.userId) {
+      //   return response.status(401).json({
+      //     message: 'Unauthorized',
+      //   })
+      // }
       if (user?.id !== thread.userId) {
-        return response.status(401).json({
-          message: 'Unauthorized',
-        })
+        throw new UnauthorizedException('Unauthorized', 403, 'E_UNTHORIZED')
       }
 
       await thread.delete()
@@ -113,9 +124,18 @@ export default class ThreadsController {
         message: 'Thread deleted Successfully',
       })
     } catch (error) {
-      return response.status(500).json({
-        message: error,
-      })
+      // return response.status(500).json({
+      //   message: error,
+      // })
+      if (error.name === 'UnauthorizedException') {
+        return response.status(error.status).json({
+          message: error.message,
+        })
+      } else {
+        return response.status(404).json({
+          message: 'Thread Not Found!',
+        })
+      }
     }
   }
 }
